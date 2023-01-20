@@ -78,5 +78,15 @@ describe("Flow", () => {
                 return Flow.tainted({foo: Flow.tainted("bar")}).foo === "bar";
             }).should.be.true;
         });
+
+        it("should not be retainted by the object", () => {
+            run(() => {
+                const taintedProp = Flow.of("bar").taint("prop").watch();
+                const taintedObj = Flow.of({ foo: taintedProp })
+                    .taint("obj")
+                    .watch();
+                return Flow.of(taintedObj.foo).source?.meta === "prop";
+            }).should.be.true;
+        });
     });
 });
