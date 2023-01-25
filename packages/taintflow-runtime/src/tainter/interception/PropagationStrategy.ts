@@ -4,6 +4,7 @@ import {
     EvaluatedExpression,
     Mixed,
     nodes,
+    PropertyReference,
     QuotedExpression,
 } from "@taintflow/types";
 
@@ -27,6 +28,12 @@ export class PropagationStrategy {
         const {flow} = this;
         if (!flow) {
             return result;
+        }
+        if (result instanceof PropertyReference) {
+            const val = result.value;
+            if (val instanceof Boxed && val.flow) {
+                return result;
+            }
         }
         return wrap(result, (value) => flow.alter(value).watch());
     }
