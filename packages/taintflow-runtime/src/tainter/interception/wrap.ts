@@ -35,4 +35,8 @@ class WrappedPropertyReference<Base, T> extends PropertyReference<Base, T> {
     public get value() {
         return this.wrapper(this.origin.value);
     }
+
+    public set value(value: T) {
+        this.origin.value = value;
+    }
 }
