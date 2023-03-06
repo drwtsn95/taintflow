@@ -6,7 +6,7 @@ import * as _ from "lodash";
 export * from "@taintflow/types";
 export {reflection} from "./reflection";
 
-export {Flow} from "./tainter";
+export {Flow, WrappedPropertyReference} from "./tainter";
 
 export type Extension = (intercept: Interceptor) => Interceptor;
 

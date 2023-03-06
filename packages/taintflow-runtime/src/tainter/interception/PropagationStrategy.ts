@@ -32,9 +32,10 @@ export class PropagationStrategy {
         if (result instanceof PropertyReference) {
             const val = result.value;
             if (val instanceof Boxed && val.flow) {
-                return result;
+                return wrap(result, (value) => val.flow.alter(value).watch());
             }
         }
+
         return wrap(result, (value) => flow.alter(value).watch());
     }
 
