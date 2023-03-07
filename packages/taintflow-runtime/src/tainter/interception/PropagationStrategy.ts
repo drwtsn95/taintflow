@@ -29,8 +29,11 @@ export class PropagationStrategy {
         if (!flow) {
             return result;
         }
+        const val = result.value;
+        if (typeof val === 'boolean') {
+            return result;
+        }
         if (result instanceof PropertyReference) {
-            const val = result.value;
             if (val instanceof Boxed && val.flow) {
                 return wrap(result, (value) => val.flow.alter(value).watch());
             }
