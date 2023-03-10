@@ -6,6 +6,8 @@ export {nodes};
 
 import { Identifier as defaultIdentifier } from "./taxonomy";
 
+export { defaultIdentifier as DefaultIdentifier };
+
 export let identifier: typeof defaultIdentifier = defaultIdentifier;
 
 export function replaceIdentifier(newIdentifier: typeof defaultIdentifier) {
