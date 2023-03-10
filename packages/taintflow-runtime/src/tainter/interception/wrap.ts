@@ -1,6 +1,6 @@
 import {
     EvaluatedExpression,
-    Identifier,
+    DefaultIdentifier as Identifier,
     PropertyReference,
     RValue,
     ValueKind,
