@@ -7,7 +7,7 @@ import {
 } from "@taintflow/types";
 
 export type Wrapper<T> = (value: T) => T;
-export type Callback<T> = (value: T) => void;
+export type Callback<T> = (value: T) => T;
 
 export function wrap<T>(evaluated: EvaluatedExpression<T>, wrapper: Wrapper<T>):
                 typeof evaluated {
@@ -43,7 +43,7 @@ export class WrappedPropertyReference<Base, T> extends PropertyReference<Base, T
 
     public set value(value: T) {
         if (this.callback) {
-            this.callback(value);
+            value = this.callback(value);
         }
         this.origin.value = value;
     }
