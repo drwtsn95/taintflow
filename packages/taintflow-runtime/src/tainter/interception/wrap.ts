@@ -1,16 +1,18 @@
 import {
-    EvaluatedExpression,
     DefaultIdentifier as Identifier,
+    EvaluatedExpression,
     PropertyReference,
     RValue,
     ValueKind,
 } from "@taintflow/types";
 
 export type Wrapper<T> = (value: T) => T;
-export type Callback<T> = (value: T) => void;
+export type Callback<T> = (value: T) => T;
 
-export function wrap<T>(evaluated: EvaluatedExpression<T>, wrapper: Wrapper<T>):
-                typeof evaluated {
+export function wrap<T>(
+    evaluated: EvaluatedExpression<T>,
+    wrapper: Wrapper<T>
+): typeof evaluated {
     switch (evaluated.kind) {
         case ValueKind.RValue:
             return new RValue(wrapper(evaluated.value));
@@ -23,12 +25,19 @@ export function wrap<T>(evaluated: EvaluatedExpression<T>, wrapper: Wrapper<T>):
     }
 }
 
-export class WrappedPropertyReference<Base, T> extends PropertyReference<Base, T> {
+export class WrappedPropertyReference<Base, T> extends PropertyReference<
+    Base,
+    T
+> {
     private readonly origin: PropertyReference<Base, T>;
     private readonly wrapper: Wrapper<T>;
     private readonly callback?: Callback<T>;
 
-    constructor(origin: PropertyReference<Base, T>, wrapper: Wrapper<T>, callback?: Callback<T>) {
+    constructor(
+        origin: PropertyReference<Base, T>,
+        wrapper: Wrapper<T>,
+        callback?: Callback<T>
+    ) {
         super(origin.base, origin.propertyKey);
         this.origin = origin;
         this.wrapper = wrapper;
@@ -43,8 +52,9 @@ export class WrappedPropertyReference<Base, T> extends PropertyReference<Base, T
 
     public set value(value: T) {
         if (this.callback) {
-            this.callback(value);
+            this.origin.value = this.callback(value);
+        } else {
+            this.origin.value = value;
         }
-        this.origin.value = value;
     }
 }

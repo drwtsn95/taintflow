@@ -8,9 +8,9 @@ import {
     QuotedExpression,
 } from "@taintflow/types";
 
-import {reflection} from "../../reflection";
-import {Boxed, Flow} from "../Flow";
-import {wrap} from "./wrap";
+import { reflection } from "../../reflection";
+import { Boxed, Flow } from "../Flow";
+import { wrap } from "./wrap";
 
 export class PropagationStrategy {
     private flow?: Flow<Mixed>;
@@ -25,12 +25,12 @@ export class PropagationStrategy {
     }
 
     public propagate<T>(result: EvaluatedExpression<T>): typeof result {
-        const {flow} = this;
+        const { flow } = this;
         if (!flow) {
             return result;
         }
         const val = result.value;
-        if (typeof val === 'boolean') {
+        if (typeof val === "boolean") {
             return result;
         }
         if (result instanceof PropertyReference) {
@@ -43,9 +43,9 @@ export class PropagationStrategy {
     }
 
     private attachGeneric(node: nodes.Node): typeof node {
-        return <nodes.Node> <unknown> _(node)
-            .mapValues(this.attachIfQuoted.bind(this))
-            .value();
+        return <nodes.Node>(
+            (<unknown>_(node).mapValues(this.attachIfQuoted.bind(this)).value())
+        );
     }
 
     private attachCallable(node: nodes.CallableNode): typeof node {
@@ -59,8 +59,7 @@ export class PropagationStrategy {
     private attachCallee(callee: EvaluatedExpression<Mixed>) {
         return wrap(callee, (func) => {
             this.shouldReleaseArguments =
-                _.isFunction(func) &&
-                !reflection.isInstrumented(func);
+                _.isFunction(func) && !reflection.isInstrumented(func);
             return func;
         });
     }
@@ -73,7 +72,7 @@ export class PropagationStrategy {
         return wrap(argument, (value) => {
             if (_.isUndefined(this.shouldReleaseArguments)) {
                 throw new Error(
-                    '"callee" should be unquoted before "arguments".',
+                    '"callee" should be unquoted before "arguments".'
                 );
             }
             return this.shouldReleaseArguments ? this.release(value) : value;
@@ -104,7 +103,9 @@ export class PropagationStrategy {
     }
 }
 
-function isQuotedExpression<T>(value: Mixed, property: nodes.NodeProperty):
-         value is QuotedExpression<T> {
+function isQuotedExpression<T>(
+    value: Mixed,
+    property: nodes.NodeProperty
+): value is QuotedExpression<T> {
     return _.isFunction(value) && property !== "arguments";
 }
