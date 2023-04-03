@@ -1,8 +1,8 @@
-import {should} from "chai";
+import { should } from "chai";
 import "mocha";
 
-import {Flow} from "../../src";
-import {run} from "../sandbox";
+import { Flow } from "../../src";
+import { run } from "../sandbox";
 
 should();
 
@@ -75,7 +75,7 @@ describe("Flow", () => {
     context("tainted property in tainted object", () => {
         it("should remain the same after tainting", () => {
             run(() => {
-                return Flow.tainted({foo: Flow.tainted("bar")}).foo === "bar";
+                return Flow.tainted({ foo: Flow.tainted("bar") }).foo === "bar";
             }).should.be.true;
         });
 
@@ -89,4 +89,19 @@ describe("Flow", () => {
             }).should.be.true;
         });
     });
+
+    // This test fails because vm sandbox rewrites base object's prototypes
+    // context("instrumented function called via context linking methods", () => {
+    //     it("should propagate arguments into f.call() if f is instrumented", () => {
+    //         run(() => {
+    //             let y;
+    //             const f = function (x: string) {
+    //                 y = x.split(" ");
+    //             };
+    //             f.call({}, Flow.tainted("test 123"));
+    //             return Flow.of(y).isTainted;
+    //         }).should.be.true;
+    //     });
+    // });
+    // TODO: add same test for apply
 });

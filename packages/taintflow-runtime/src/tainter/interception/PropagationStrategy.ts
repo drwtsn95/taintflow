@@ -6,11 +6,15 @@ import {
     nodes,
     PropertyReference,
     QuotedExpression,
+    ValueKind,
 } from "@taintflow/types";
 
 import { reflection } from "../../reflection";
 import { Boxed, Flow } from "../Flow";
 import { wrap } from "./wrap";
+
+const functionPrototypeCall = Function.prototype.call;
+const functionPrototypeApply = Function.prototype.apply;
 
 export class PropagationStrategy {
     private flow?: Flow<Mixed>;
@@ -57,6 +61,23 @@ export class PropagationStrategy {
     }
 
     private attachCallee(callee: EvaluatedExpression<Mixed>) {
+        if (
+            callee.kind === ValueKind.PropertyReference &&
+            _.isFunction(callee.base)
+        ) {
+            const value = callee.value;
+            const base = callee.base;
+            if (
+                value === functionPrototypeApply ||
+                value === functionPrototypeCall
+            ) {
+                return wrap(callee, (func) => {
+                    this.shouldReleaseArguments =
+                        _.isFunction(func) && !reflection.isInstrumented(base);
+                    return func;
+                });
+            }
+        }
         return wrap(callee, (func) => {
             this.shouldReleaseArguments =
                 _.isFunction(func) && !reflection.isInstrumented(func);
