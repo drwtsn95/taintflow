@@ -9,10 +9,12 @@ export class Boxed<T> {
 export class Flow<T> {
     public readonly value: T;
     public readonly source?: Source;
+    public readonly strict: boolean;
 
-    private constructor(value: T, source?: Source) {
+    private constructor(value: T, source?: Source, strict = false) {
         this.value = value;
         this.source = source;
+        this.strict = strict;
     }
 
     public static ["of"]<T>(value: Boxed<T> | T): Flow<T> {
@@ -30,8 +32,16 @@ export class Flow<T> {
         return this.source !== undefined;
     }
 
+    public get isStrict() {
+        return this.strict;
+    }
+
+    public get objectTainted() {
+        return this.isStrict;
+    }
+
     public taint(meta?: {}): Flow<T> {
-        let {source} = this;
+        let { source } = this;
         if (source === undefined) {
             source = {
                 error: new Error(),
@@ -41,12 +51,27 @@ export class Flow<T> {
         return new Flow(this.value, source);
     }
 
+    public taintStrictly(meta?: {}): Flow<T> {
+        let { source } = this;
+        if (source === undefined) {
+            source = {
+                error: new Error(),
+                meta,
+            };
+        }
+        return new Flow(this.value, source, true);
+    }
+
     public alter<V>(value: V): Flow<V> {
-        return new Flow(value, this.source);
+        return new Flow(value, this.source, this.strict);
+    }
+
+    public alterStrictly<V>(value: V): Flow<V> {
+        return new Flow(value, this.source, true);
     }
 
     public release(): T {
-        let {value} = this;
+        let { value } = this;
         while (value instanceof Boxed) {
             value = value.flow.value;
         }
@@ -56,7 +81,7 @@ export class Flow<T> {
     public watch(): T {
         // We're intentionally tricking the type system at this point.
         // tslint:disable-next-line: no-any
-        return <any> new Boxed(this);
+        return <any>new Boxed(this);
     }
 }
 

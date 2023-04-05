@@ -22,8 +22,12 @@ export class PropagationStrategy {
     private shouldReleaseThis?: boolean;
     private shouldReleaseArguments?: boolean;
     private objBaseFlow?: Flow<Mixed>;
+    private shouldPropagateAnyway?: boolean;
 
     public attach(node: nodes.Node): typeof node {
+        if (node.type === "LogicalExpression") {
+            this.shouldPropagateAnyway = true;
+        }
         if (nodes.isMember(node)) {
             return this.attachMember(node);
         }
@@ -192,8 +196,13 @@ export class PropagationStrategy {
 
     private release<T>(value: Boxed<T> | T) {
         if (value instanceof Boxed) {
-            this.flow = value.flow;
-            return value.flow.release();
+            const releasedValue = value.flow.release();
+            if (!value.flow.isStrict || this.shouldPropagateAnyway) {
+                this.flow = value.flow;
+            } else {
+                this.flow = value.flow.alter(releasedValue);
+            }
+            return releasedValue;
         }
         return value;
     }
