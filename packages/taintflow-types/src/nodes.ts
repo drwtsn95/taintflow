@@ -3,9 +3,7 @@ import * as types from "babel-types";
 import {Mixed, QuotedArgumentsExpression, QuotedExpression} from "./taxonomy";
 
 export type Node
-    = CallableNode
-    | {readonly ["type"]: "MemberExpression"} &
-      MemberExpression<Mixed, PropertyKey>
+    = CallableNode | MemberNode
     | {readonly ["type"]: "UnaryExpression"} &
       UnaryExpression<Mixed>
     | {readonly ["type"]: "BinaryExpression"} &
@@ -20,6 +18,13 @@ export type CallableNode
 export function isCallable(node: Node): node is CallableNode {
     return node.type === "CallExpression" ||
            node.type === "NewExpression";
+}
+
+export type MemberNode
+    = {readonly ["type"]: "MemberExpression"} & MemberExpression<Mixed, PropertyKey>
+
+export function isMember(node: Node): node is MemberNode {
+    return node.type === "MemberExpression";
 }
 
 export type NodeProperty
