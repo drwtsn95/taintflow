@@ -104,4 +104,18 @@ describe("Flow", () => {
     //     });
     // });
     // TODO: add same test for apply
+
+    context("calling methods of tainted object", () => {
+        it("should propagate tainted `this` into instrumented methods", () => {
+            run(() => {
+                let global: unknown;
+                Flow.tainted({
+                    foo() {
+                        global = this;
+                    }
+                }).foo();
+                return Flow.of(global).isTainted;
+            }).should.be.true;
+        });
+    });
 });

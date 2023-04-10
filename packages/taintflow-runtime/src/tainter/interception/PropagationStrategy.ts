@@ -11,7 +11,7 @@ import {
 
 import { reflection } from "../../reflection";
 import { Boxed, Flow } from "../Flow";
-import { wrap } from "./wrap";
+import { wrap, WrappedPropertyReference } from "./wrap";
 
 const functionPrototypeCall = Function.prototype.call;
 const functionPrototypeApply = Function.prototype.apply;
@@ -19,17 +19,21 @@ const functionPrototypeApply = Function.prototype.apply;
 export class PropagationStrategy {
     private flow?: Flow<Mixed>;
     private shouldReleaseArguments?: boolean;
+    private objBaseFlow?: Flow<Mixed>;
 
     public attach(node: nodes.Node): typeof node {
-        const attached = this.attachGeneric(node);
-        if (!nodes.isCallable(attached)) {
-            return attached;
+        if (nodes.isMember(node)) {
+            return this.attachMember(node);
         }
-        return this.attachCallable(attached);
+        const attached = this.attachGeneric(node);
+        if (nodes.isCallable(attached)) {
+            return this.attachCallable(attached);
+        }
+        return attached;
     }
 
     public propagate<T>(result: EvaluatedExpression<T>): typeof result {
-        const { flow } = this;
+        const { flow, objBaseFlow } = this;
         if (!flow) {
             return result;
         }
@@ -37,13 +41,50 @@ export class PropagationStrategy {
         if (typeof val === "boolean") {
             return result;
         }
-        if (result instanceof PropertyReference) {
-            if (val instanceof Boxed && val.flow) {
-                return wrap(result, (value) => val.flow.alter(value).watch());
+        if (result.kind === ValueKind.PropertyReference) {
+            let baseWrapper;
+            if (objBaseFlow) {
+                baseWrapper = (value: T) => objBaseFlow.alter(value).watch();
             }
+            const val = result.value;
+            if (val instanceof Boxed && val.flow) {
+                return wrap(
+                    result,
+                    (value) => val.flow.alter(value).watch(),
+                    baseWrapper
+                );
+            }
+            return wrap(
+                result,
+                (value) => flow.alter(value).watch(),
+                baseWrapper
+            );
         }
-
         return wrap(result, (value) => flow.alter(value).watch());
+    }
+
+    private attachMember(node: nodes.MemberNode): typeof node {
+        return {
+            ...node,
+            object: () => this.attachObject(node.object()),
+            property: () => this.attachProperty(node.property()),
+        };
+    }
+
+    private attachObject(object: EvaluatedExpression<Mixed>) {
+        return wrap(object, (value) => {
+            if (value instanceof Boxed) {
+                const flow = value.flow;
+                this.objBaseFlow = flow;
+                this.flow = flow;
+                return flow.release();
+            }
+            return value;
+        });
+    }
+
+    private attachProperty<T>(property: EvaluatedExpression<T>) {
+        return this.attachEvaluated(property);
     }
 
     private attachGeneric(node: nodes.Node): typeof node {
@@ -61,12 +102,20 @@ export class PropagationStrategy {
     }
 
     private attachCallee(callee: EvaluatedExpression<Mixed>) {
-        if (
-            callee.kind === ValueKind.PropertyReference &&
-            _.isFunction(callee.base)
-        ) {
+        if (callee.kind === ValueKind.PropertyReference) {
+            return this.attachPropRefCallee(callee);
+        }
+        return wrap(callee, (func) => {
+            this.shouldReleaseArguments =
+                _.isFunction(func) && !reflection.isInstrumented(func);
+            return func;
+        });
+    }
+
+    private attachPropRefCallee(callee: PropertyReference<Mixed, Mixed>) {
+        const base = callee.base;
+        if (_.isFunction(base)) {
             const value = callee.value;
-            const base = callee.base;
             if (
                 value === functionPrototypeApply ||
                 value === functionPrototypeCall
@@ -77,6 +126,31 @@ export class PropagationStrategy {
                     return func;
                 });
             }
+            return wrap(callee, (func) => {
+                this.shouldReleaseArguments =
+                    _.isFunction(func) && !reflection.isInstrumented(func);
+                return func;
+            });
+        }
+        if (callee instanceof WrappedPropertyReference) {
+            return wrap(
+                callee,
+                (func) => {
+                    this.shouldReleaseArguments =
+                        _.isFunction(func) && !reflection.isInstrumented(func);
+                    return func;
+                },
+                (value) => {
+                    if (_.isUndefined(this.shouldReleaseArguments)) {
+                        throw new Error(
+                            '"callee.value" should be accessed before "callee.base".'
+                        );
+                    }
+                    return this.shouldReleaseArguments
+                        ? this.release(value)
+                        : value;
+                }
+            );
         }
         return wrap(callee, (func) => {
             this.shouldReleaseArguments =

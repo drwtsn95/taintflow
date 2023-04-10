@@ -11,7 +11,8 @@ export type Callback<T> = (value: T) => T;
 
 export function wrap<T>(
     evaluated: EvaluatedExpression<T>,
-    wrapper: Wrapper<T>
+    wrapper: Wrapper<T>,
+    baseWrapper?: Wrapper<T>,
 ): typeof evaluated {
     switch (evaluated.kind) {
         case ValueKind.RValue:
@@ -19,7 +20,7 @@ export function wrap<T>(
         case ValueKind.Identifier:
             return new Identifier(() => wrapper(evaluated.value));
         case ValueKind.PropertyReference:
-            return new WrappedPropertyReference(evaluated, wrapper);
+            return new WrappedPropertyReference(evaluated, wrapper, undefined, <Wrapper<typeof evaluated.base>>baseWrapper);
         default:
             throw new Error("Invalid kind of EvaluatedExpression.");
     }
@@ -32,11 +33,13 @@ export class WrappedPropertyReference<Base, T> extends PropertyReference<
     private readonly origin: PropertyReference<Base, T>;
     private readonly wrapper: Wrapper<T>;
     private readonly callback?: Callback<T>;
+    private baseWrapper?: Wrapper<Base>;
 
     constructor(
         origin: PropertyReference<Base, T>,
         wrapper: Wrapper<T>,
-        callback?: Callback<T>
+        callback?: Callback<T>,
+        baseWrapper?: Wrapper<Base>
     ) {
         super(origin.base, origin.propertyKey);
         this.origin = origin;
@@ -44,6 +47,16 @@ export class WrappedPropertyReference<Base, T> extends PropertyReference<
         if (callback) {
             this.callback = callback;
         }
+        if (baseWrapper) {
+            this.baseWrapper = baseWrapper;
+        }
+    }
+
+    public get base() {
+        if (this.baseWrapper) {
+            return this.baseWrapper(this.origin.base);
+        }
+        return this.origin.base;
     }
 
     public get value() {

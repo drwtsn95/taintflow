@@ -57,21 +57,25 @@ export class Identifier<T> implements HasValue<T> {
 }
 
 export class PropertyReference<Base, T> implements HasValue<T> {
+    private readonly _base: Base;
     public readonly kind: ValueKind.PropertyReference
         = ValueKind.PropertyReference;
-    public readonly base: Base;
     public readonly propertyKey: PropertyKey;
 
     constructor(base: Base, propertyKey: PropertyKey) {
-        this.base = base;
+        this._base = base;
         this.propertyKey = propertyKey;
     }
 
+    get base() {
+        return this._base;
+    }
+
     get value() {
-        return Reflect.get(Object(this.base), this.propertyKey);
+        return Reflect.get(Object(this._base), this.propertyKey);
     }
 
     set value(value: T) {
-        Reflect.set(Object(this.base), this.propertyKey, value);
+        Reflect.set(Object(this._base), this.propertyKey, value);
     }
 }
