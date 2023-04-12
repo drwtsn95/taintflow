@@ -50,17 +50,24 @@ export class PropagationStrategy {
             if (val instanceof Boxed && val.flow) {
                 return wrap(
                     result,
-                    (value) => val.flow.alter(value).watch(),
+                    this.defaultWrapper(val.flow),
                     baseWrapper
                 );
             }
             return wrap(
                 result,
-                (value) => flow.alter(value).watch(),
+                this.defaultWrapper(flow),
                 baseWrapper
             );
         }
-        return wrap(result, (value) => flow.alter(value).watch());
+        return wrap(result, this.defaultWrapper(flow));
+    }
+
+    private defaultWrapper<T>(flow: Flow<Mixed>) {
+        return (value: T) =>
+            (this.shouldReleaseArguments && Array.isArray(value))
+                ? <T><Mixed> value.map((e) => flow.alter(e).watch())
+                : flow.alter(value).watch();
     }
 
     private attachMember(node: nodes.MemberNode): typeof node {
