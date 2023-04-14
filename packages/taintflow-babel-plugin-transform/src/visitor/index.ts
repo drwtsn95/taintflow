@@ -6,3 +6,7 @@ export {BinaryExpression} from "./BinaryExpression";
 export {LogicalExpression} from "./LogicalExpression";
 export {UnaryExpression} from "./UnaryExpression";
 export {SwitchStatement} from "./SwitchStatement";
+export {IfStatement} from "./IfStatement";
+export {WhileStatement} from "./WhileStatement";
+export {DoWhileStatement} from "./DoWhileStatement";
+export {ForStatement} from "./ForStatement";
