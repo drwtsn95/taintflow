@@ -5,3 +5,4 @@ export {NewExpression} from "./NewExpression";
 export {BinaryExpression} from "./BinaryExpression";
 export {LogicalExpression} from "./LogicalExpression";
 export {UnaryExpression} from "./UnaryExpression";
+export {SwitchStatement} from "./SwitchStatement";

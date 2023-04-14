@@ -1,1 +1,2 @@
-export {NodeInterceptor} from "./NodeInterceptor";
+export { NodeInterceptor } from "./NodeInterceptor";
+export { NodeReleaser } from "./NodeReleaser";
