@@ -47,7 +47,7 @@ describe("Flow", () => {
 
         it("should propagate after the method call", () => {
             run(() => {
-                return Flow.of(Flow.tainted("a#b").split("#")).isTainted;
+                return Flow.of(Flow.tainted("a1#b2").slice(3)).isTainted;
             }).should.be.true;
         });
 
@@ -112,9 +112,19 @@ describe("Flow", () => {
                 Flow.tainted({
                     foo() {
                         global = this;
-                    }
+                    },
                 }).foo();
                 return Flow.of(global).isTainted;
+            }).should.be.true;
+        });
+    });
+
+    context("native methods", () => {
+        it("should not taint Array return value but taint each of Array elements", () => {
+            run(() => {
+                return Flow.tainted("a#b")
+                    .split("#")
+                    .every((x) => Flow.of(x).isTainted);
             }).should.be.true;
         });
     });

@@ -9,10 +9,10 @@ import {
 export type Wrapper<T> = (value: T) => T;
 export type Callback<T> = (value: T) => T;
 
-export function wrap<T>(
+export function wrap<T, Base>(
     evaluated: EvaluatedExpression<T>,
     wrapper: Wrapper<T>,
-    baseWrapper?: Wrapper<T>,
+    baseWrapper?: Wrapper<Base>,
 ): typeof evaluated {
     switch (evaluated.kind) {
         case ValueKind.RValue:
