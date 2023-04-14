@@ -1,8 +1,8 @@
-import {template, types} from "babel-core";
+import { template, types } from "babel-core";
 
-import {astify, NamedExpressions} from "./astify";
-import {literals} from "./literals";
-import {quotedExpressions} from "./quoted";
+import { astify, NamedExpressions } from "./astify";
+import { literals } from "./literals";
+import { quotedExpressions } from "./quoted";
 
 export class NodeInterceptor<T extends types.Node> {
     protected readonly node: T;
@@ -28,17 +28,18 @@ export class NodeInterceptor<T extends types.Node> {
 }
 
 namespace Templates {
-    export type Interceptor =
-        (nodes: {description: types.ObjectExpression}) =>
-        types.ExpressionStatement;
+    export type Interceptor = (nodes: {
+        description: types.ObjectExpression;
+    }) => types.ExpressionStatement;
 
-    export const interceptor = <Interceptor> <{}>
-        template("taintflow.intercept(description).value");
+    export const interceptor = <Interceptor>(
+        (<{}>template("taintflow.intercept(description).value"))
+    );
 }
 
 namespace Nodes {
     export function interceptor(description: NamedExpressions) {
-        return Templates.interceptor({description: astify(description)})
-                        .expression;
+        return Templates.interceptor({ description: astify(description) })
+            .expression;
     }
 }
