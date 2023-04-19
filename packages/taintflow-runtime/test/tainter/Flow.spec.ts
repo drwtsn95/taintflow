@@ -127,5 +127,16 @@ describe("Flow", () => {
                     .every((x) => Flow.of(x).isTainted);
             }).should.be.true;
         });
+
+        // This test fails because vm sandbox rewrites base object's prototypes
+        // it("should not release arguments in Array.prototype.push", () => {
+        //     run(() => {
+        //         let arr = [];
+        //         arr.push(Flow.tainted("direct"));
+        //         Array.prototype.push.call(arr, Flow.tainted("via_call"));
+        //         Array.prototype.push.apply(arr, [Flow.tainted("via_apply")]);
+        //         return arr.every((x) => Flow.of(x).isTainted);
+        //     }).should.be.true;
+        // });
     });
 });
