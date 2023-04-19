@@ -15,9 +15,11 @@ import { wrap, WrappedPropertyReference } from "./wrap";
 
 const functionPrototypeCall = Function.prototype.call;
 const functionPrototypeApply = Function.prototype.apply;
+const arrayPrototypePush = Array.prototype.push;
 
 export class PropagationStrategy {
     private flow?: Flow<Mixed>;
+    private shouldReleaseThis?: boolean;
     private shouldReleaseArguments?: boolean;
     private objBaseFlow?: Flow<Mixed>;
 
@@ -50,23 +52,23 @@ export class PropagationStrategy {
             if (val instanceof Boxed && val.flow) {
                 return wrap(
                     result,
-                    this.defaultWrapper(val.flow),
+                    this.defaultPropagateWrapper(val.flow),
                     baseWrapper
                 );
             }
             return wrap(
                 result,
-                this.defaultWrapper(flow),
+                this.defaultPropagateWrapper(flow),
                 baseWrapper
             );
         }
-        return wrap(result, this.defaultWrapper(flow));
+        return wrap(result, this.defaultPropagateWrapper(flow));
     }
 
-    private defaultWrapper<T>(flow: Flow<Mixed>) {
+    private defaultPropagateWrapper<T>(flow: Flow<Mixed>) {
         return (value: T) =>
-            (this.shouldReleaseArguments && Array.isArray(value))
-                ? <T><Mixed> value.map((e) => flow.alter(e).watch())
+            this.shouldReleaseArguments && Array.isArray(value)
+                ? <T>(<Mixed>value.map((e) => flow.alter(e).watch()))
                 : flow.alter(value).watch();
     }
 
@@ -108,15 +110,21 @@ export class PropagationStrategy {
         };
     }
 
+    private defaultAttachCalleeWrapper() {
+        return (func: Mixed) => {
+            this.shouldReleaseThis =
+                _.isFunction(func) && !reflection.isInstrumented(func);
+            this.shouldReleaseArguments =
+                (func === arrayPrototypePush) ? false : this.shouldReleaseThis;
+            return func;
+        };
+    }
+
     private attachCallee(callee: EvaluatedExpression<Mixed>) {
         if (callee.kind === ValueKind.PropertyReference) {
             return this.attachPropRefCallee(callee);
         }
-        return wrap(callee, (func) => {
-            this.shouldReleaseArguments =
-                _.isFunction(func) && !reflection.isInstrumented(func);
-            return func;
-        });
+        return wrap(callee, this.defaultAttachCalleeWrapper());
     }
 
     private attachPropRefCallee(callee: PropertyReference<Mixed, Mixed>) {
@@ -128,42 +136,28 @@ export class PropagationStrategy {
                 value === functionPrototypeCall
             ) {
                 return wrap(callee, (func) => {
-                    this.shouldReleaseArguments =
+                    this.shouldReleaseThis =
                         _.isFunction(func) && !reflection.isInstrumented(base);
+                    this.shouldReleaseArguments =
+                        (base === arrayPrototypePush)
+                            ? false
+                            : this.shouldReleaseThis;
                     return func;
                 });
             }
-            return wrap(callee, (func) => {
-                this.shouldReleaseArguments =
-                    _.isFunction(func) && !reflection.isInstrumented(func);
-                return func;
-            });
+            return wrap(callee, this.defaultAttachCalleeWrapper());
         }
         if (callee instanceof WrappedPropertyReference) {
-            return wrap(
-                callee,
-                (func) => {
-                    this.shouldReleaseArguments =
-                        _.isFunction(func) && !reflection.isInstrumented(func);
-                    return func;
-                },
-                (value) => {
-                    if (_.isUndefined(this.shouldReleaseArguments)) {
-                        throw new Error(
-                            '"callee.value" should be accessed before "callee.base".'
-                        );
-                    }
-                    return this.shouldReleaseArguments
-                        ? this.release(value)
-                        : value;
+            return wrap(callee, this.defaultAttachCalleeWrapper(), (value) => {
+                if (_.isUndefined(this.shouldReleaseThis)) {
+                    throw new Error(
+                        '"callee.value" should be accessed before "callee.base".'
+                    );
                 }
-            );
+                return this.shouldReleaseThis ? this.release(value) : value;
+            });
         }
-        return wrap(callee, (func) => {
-            this.shouldReleaseArguments =
-                _.isFunction(func) && !reflection.isInstrumented(func);
-            return func;
-        });
+        return wrap(callee, this.defaultAttachCalleeWrapper());
     }
 
     private attachArguments(args: ReadonlyArray<EvaluatedExpression<Mixed>>) {
