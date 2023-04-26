@@ -9,7 +9,7 @@ export type Node
     | {readonly ["type"]: "BinaryExpression"} &
       BinaryExpression<Mixed, Mixed>
     | {readonly ["type"]: "LogicalExpression"} &
-      LogicalExpression<Mixed, Mixed>;
+      LogicalExpression<Mixed, Mixed>
 
 export type CallableNode
     = {readonly ["type"]: "CallExpression"} & CallExpression
@@ -34,7 +34,7 @@ export type NodeProperty
     | keyof MemberExpression<Mixed, PropertyKey>
     | keyof UnaryExpression<Mixed>
     | keyof BinaryExpression<Mixed, Mixed>
-    | keyof LogicalExpression<Mixed, Mixed>;
+    | keyof LogicalExpression<Mixed, Mixed>
 
 export type CallExpression = CallableExpression;
 

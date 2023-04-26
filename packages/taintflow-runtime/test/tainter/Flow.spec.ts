@@ -57,6 +57,17 @@ describe("Flow", () => {
                 return isFlowedInto(Flow.tainted(""));
             }).should.be.true;
         });
+
+        it("should propagate after addition assignment", () => {
+            run(() => {
+                let accumulator = {text: "biba"};
+                accumulator.text += Flow.tainted("boba");
+                return (
+                    Flow.of(accumulator.text).isTainted &&
+                    Flow.of(accumulator.text).release() === "bibaboba"
+                );
+            }).should.be.true;
+        });
     });
 
     context("tainted value interacting with native API", () => {
