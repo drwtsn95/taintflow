@@ -7,6 +7,7 @@ export function taintflowed(source: string) {
         plugins: [
             // tslint:disable-next-line
             require("babel-plugin-transform-es2015-arrow-functions"),
+            require("./assignment-transformation.js").default,
             plugin,
         ],
     });

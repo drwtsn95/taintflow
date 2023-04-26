@@ -10,6 +10,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "@taintflow/*": ["../packages/taintflow-*/src"]
