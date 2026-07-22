@@ -1,4 +1,5 @@
-import {template, types} from "babel-core";
+import {types} from "@babel/core";
+import template from "@babel/template";
 
 import {
     isEvaluatedExpressionValueAccessor,
@@ -25,22 +26,22 @@ export class EvaluatedExpression {
 
 namespace Templates {
     export type Identifier =
-        (nodes: {identifier: types.Identifier}) => types.ExpressionStatement;
+        (nodes: {IDENTIFIER: types.Identifier}) => types.ExpressionStatement;
     export type RValue =
-        (nodes: {expression: types.Expression}) => types.ExpressionStatement;
+        (nodes: {EXPRESSION: types.Expression}) => types.ExpressionStatement;
 
     export const identifier = <Identifier> <{}>
-        template("new taintflow.Identifier(() => identifier)");
+        template("new taintflow.Identifier(() => IDENTIFIER)");
     export const rvalue = <RValue> <{}>
-        template("new taintflow.RValue(expression)");
+        template("new taintflow.RValue(EXPRESSION)");
 }
 
 namespace Expressions {
     export function identifier(id: types.Identifier) {
-        return Templates.identifier({identifier: id}).expression;
+        return Templates.identifier({IDENTIFIER: id}).expression;
     }
 
     export function rvalue(expression: types.Expression) {
-        return Templates.rvalue({expression}).expression;
+        return Templates.rvalue({EXPRESSION: expression}).expression;
     }
 }

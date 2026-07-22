@@ -1,5 +1,5 @@
-import {types} from "babel-core";
-import {NodePath} from "babel-traverse";
+import {types} from "@babel/core";
+import {NodePath} from "@babel/traverse";
 
 import {CallableExpression} from "./CallableExpression";
 

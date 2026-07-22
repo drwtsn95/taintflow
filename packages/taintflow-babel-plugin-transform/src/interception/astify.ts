@@ -1,4 +1,4 @@
-import {types} from "babel-core";
+import {types} from "@babel/core";
 import * as _ from "lodash";
 
 export type NamedExpressions = {readonly [property: string]: types.Expression};

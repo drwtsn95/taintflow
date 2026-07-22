@@ -1,1 +1,25 @@
-../../tsconfig.json
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "es6",
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@taintflow/*": ["../packages/taintflow-*/src"]
+    }
+  },
+  "include": [
+    "src",
+    "test"
+  ]
+}

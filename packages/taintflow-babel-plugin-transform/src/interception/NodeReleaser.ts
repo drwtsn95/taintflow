@@ -1,4 +1,5 @@
-import { template, types } from "babel-core";
+import { types } from "@babel/core";
+import template from "@babel/template";
 import {TranspilationError} from "../TranspilationError";
 
 export class NodeReleaser {
@@ -25,16 +26,16 @@ export class NodeReleaser {
 
 namespace Templates {
     export type Releaser = (nodes: {
-        target: types.Expression;
+        TARGET: types.Expression;
     }) => types.ExpressionStatement;
 
     export const releaser = <Releaser>(
-        (<{}>template("taintflow.Flow.of(target).release()"))
+        (<{}>template("taintflow.Flow.of(TARGET).release()"))
     );
 }
 
 namespace Nodes {
     export function releaser(target: types.Expression) {
-        return Templates.releaser({ target: target})
+        return Templates.releaser({ TARGET: target})
     }
 }

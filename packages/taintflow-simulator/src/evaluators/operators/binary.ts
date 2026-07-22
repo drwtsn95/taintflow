@@ -1,5 +1,5 @@
 import {Mixed, QuotedExpression} from "@taintflow/types";
-import {BINARY_OPERATORS} from "babel-types";
+import {BINARY_OPERATORS} from "@babel/types";
 
 import {compile, Operators} from "./compilation";
 
@@ -20,8 +20,3 @@ export const binaryOperators = <BinaryOperators> compile({
         })`;
     },
 });
-
-declare module "babel-types" {
-    // tslint:disable-next-line: no-shadowed-variable
-    export const BINARY_OPERATORS: ReadonlyArray<string>;
-}

@@ -1,5 +1,5 @@
 import {Mixed, QuotedExpression, ValueKind} from "@taintflow/types";
-import {UNARY_OPERATORS} from "babel-types";
+import {UNARY_OPERATORS} from "@babel/types";
 
 import {compile, Operators} from "./compilation";
 
@@ -36,8 +36,3 @@ export const unaryOperators: UnaryOperators = {
         return true;
     },
 };
-
-declare module "babel-types" {
-    // tslint:disable-next-line: no-shadowed-variable
-    export const UNARY_OPERATORS: ReadonlyArray<string>;
-}

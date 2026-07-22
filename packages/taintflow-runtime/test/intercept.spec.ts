@@ -31,7 +31,7 @@ describe("intercept", () => {
         context("like delete", () => {
             it("should support property references", () => {
                 run(() => {
-                    const object = {property: 1};
+                    const object: {property?: number} = {property: 1};
                     delete object.property;
                     return object.hasOwnProperty("property");
                 }).should.be.false;
@@ -47,13 +47,14 @@ describe("intercept", () => {
 
             context("like `typeof void x` with unresolved `x`", () => {
                 it("should throw", () => {
-                    run(() => {
+                    const name = run(() => {
                         try {
                             typeof void x;
                         } catch (e) {
-                            return e.name;
+                            return (e as Error).name;
                         }
-                    }).should.be.equal("ReferenceError");
+                    });
+                    name!.should.be.equal("ReferenceError");
                 });
             });
         });

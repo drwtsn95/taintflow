@@ -1,4 +1,4 @@
-import {Visitor} from "babel-core";
+import {Visitor} from "@babel/traverse";
 
 import * as visitor from "./visitor";
 
