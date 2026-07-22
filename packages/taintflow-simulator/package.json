@@ -19,12 +19,12 @@
     "prepare": "rm -rf dist && tsc"
   },
   "devDependencies": {
-    "typescript": "^3.4.5"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@babel/types": "^7.29.7",
     "@taintflow/types": "^0.0.0",
-    "@types/lodash": "^4.14.52",
-    "babel-types": "^6.26.0",
-    "lodash": "^4.17.4"
+    "@types/lodash": "^4.17.24",
+    "lodash": "^4.17.21"
   }
 }

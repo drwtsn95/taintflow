@@ -40,4 +40,4 @@ process.argv.splice(
 );
 
 // tslint:disable-next-line: no-submodule-imports
-require("babel-cli/bin/babel");
+require("@babel/cli/bin/babel");

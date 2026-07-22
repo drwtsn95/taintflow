@@ -1,4 +1,4 @@
-import * as types from "babel-types";
+import * as types from "@babel/types";
 
 import {Mixed, QuotedArgumentsExpression, QuotedExpression} from "./taxonomy";
 

@@ -1,4 +1,4 @@
-import {types} from "babel-core";
+import {types} from "@babel/core";
 import * as _ from "lodash";
 
 import {EvaluatedExpression} from "./EvaluatedExpression";
@@ -8,7 +8,7 @@ export type QuotedExpressions = {readonly [name: string]: QuotedExpression};
 
 export function quotedExpressions(node: types.Node): QuotedExpressions {
     return <{}> _(node)
-        .pickBy((value) => types.isExpression(<{}> value))
+        .pickBy((value) => types.isExpression(<types.Node> <{}> value))
         .mapValues(quotedExpression)
         .value();
 }

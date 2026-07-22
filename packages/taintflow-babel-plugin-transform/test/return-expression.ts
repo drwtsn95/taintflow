@@ -1,11 +1,18 @@
-import {transform, types} from "babel-core";
-import {default as generate} from "babel-generator";
+import {transformSync, types} from "@babel/core";
+import {default as generate} from "@babel/generator";
 
 import {taintflowed} from "../src";
 
 export function original<T>(func: () => T) {
-    const {ast} = transform(func.toString());
-    return generate(returnExpression(ast)).code;
+    const result = transformSync(func.toString(), {
+        ast: true,
+        babelrc: false,
+        configFile: false,
+    });
+    if (result === null) {
+        throw new Error("Babel transform returned no result.");
+    }
+    return generate(returnExpression(result.ast as types.Node)).code;
 }
 
 export function transformed<T>(func: () => T) {

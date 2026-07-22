@@ -1,5 +1,5 @@
 import {Mixed, QuotedExpression} from "@taintflow/types";
-import {LOGICAL_OPERATORS} from "babel-types";
+import {LOGICAL_OPERATORS} from "@babel/types";
 
 import {compile, Operators} from "./compilation";
 
@@ -17,8 +17,3 @@ export const logicalOperators = <LogicalOperators> compile({
         })`;
     },
 });
-
-declare module "babel-types" {
-    // tslint:disable-next-line: no-shadowed-variable
-    export const LOGICAL_OPERATORS: ReadonlyArray<string>;
-}

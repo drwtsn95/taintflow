@@ -1,4 +1,4 @@
-import {types} from "babel-core";
+import {types} from "@babel/core";
 
 export interface EvaluatedExpressionValueAccessor
        extends types.MemberExpression {
@@ -20,6 +20,6 @@ export function isEvaluatedExpressionValueAccessor(expr: types.Expression):
            isValueIdentifier(expr.property);
 }
 
-function isValueIdentifier(expr: types.Expression): expr is ValueIdentifier {
+function isValueIdentifier(expr: types.Node): expr is ValueIdentifier {
     return types.isIdentifier(expr) && expr.name === "value";
 }
